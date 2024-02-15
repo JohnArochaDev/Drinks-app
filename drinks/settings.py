@@ -26,20 +26,29 @@ env = environ.Env(
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-## SECRET_KEY = 'django-insecure-uam_!)$wf45uo9(l&9h_4gjb)2mo)s%-03fxz=(9mab-l!ov&#'
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = 'django-insecure-uam_!)$wf45uo9(l&9h_4gjb)2mo)s%-03fxz=(9mab-l!ov&#'
+# SECRET_KEY = env('SECRET_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'RENDER' not in os.environ
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["drinks-app-bitter-voice-6309.fly.dev", "localhost", "127.0.0.1"] # new
+CSRF_TRUSTED_ORIGINS = ["https://drinks-app-bitter-voice-6309.fly.dev"] # new
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# ALLOWED_HOSTS = ["drinks-app-bitter-voice-6309.dev", "localhost", "127.0.0.1"] # new
+# CSRF_TRUSTED_ORIGINS = ["https://drinks-app-bitter-voice-6309.fly.dev"] # new
 
 # Application definition
 
@@ -91,16 +100,19 @@ WSGI_APPLICATION = 'drinks.wsgi.application'
 
 DATABASES = {
     'default': {
+        'default': dj_database_url.config(default='postgresql://postgres:postgres@localhost:5432/DrinksAppDB', conn_max_age=600),
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'DrinksAppDB',
         'USER': 'jackie.sechrist.3',
         'PASSWORD': 'zjOtch8m7QPd',
         'HOST': 'ep-proud-violet-a5ln1uql.us-east-2.aws.neon.tech',
         'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+            'options': 'endpoint=ep-proud-violet-a5ln1uql',
+        },
     }
-    
 }
-
 
 
 
@@ -139,11 +151,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 if not DEBUG:
     # Tell Django to copy statics to the `staticfiles` directory
     # in your application directory on Render.
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATIC_ROOT = os.path.normpath(os.path.join(BASE_DIR, 'staticfiles'))
+    STATICFILES_DIRS = (
+        os.path.join(BASE_DIR, 'static'),
+    )
 
     # Turn on WhiteNoise storage backend that takes care of compressing static files
     # and creating unique names for each version so they can safely be cached forever.
